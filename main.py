@@ -1,19 +1,17 @@
 # Imports
 import os
-from astrapy.db import AstraDB
+from astrapy import DataAPIClient
 from langchain_astradb import AstraDBChatMessageHistory
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, ConversationChain
 import boto3
-from langchain_community.llms.bedrock import Bedrock
 from langchain_community.chat_models import BedrockChat
-from getpass import getpass
 from dotenv import load_dotenv
 
 # Initiate the dotenv for key fetching
-load_dotenv()
+load_dotenv("keys.env")
 
 # Load keys from .env file
 OPENAI_API = os.getenv("OPENAI_API")
@@ -22,11 +20,10 @@ AWS_SECRET_KEY = os.getenv("AWS_SECRET_KEY")
 ASTRA_TOKEN = os.getenv("ASTRA_TOKEN")
 ASTRA_ENDPOINT = os.getenv("ASTRA_ENDPOINT")
 
-# Initialize the client
-db = AstraDB(
-  token=ASTRA_TOKEN,
-  api_endpoint=ASTRA_ENDPOINT)
-
+client = DataAPIClient(ASTRA_TOKEN)
+db = client.get_database_by_api_endpoint(
+  ASTRA_ENDPOINT
+)
 # print(f"Connected to Astra DB: {db.get_collections()}")
 
 
