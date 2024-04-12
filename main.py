@@ -26,20 +26,24 @@ db = client.get_database_by_api_endpoint(
 # print(f"Connected to Astra DB: {db.get_collections()}")
 
 
+
+# Initialize an instance of AstraDBChatMessageHistory with specific parameters
 message_history = AstraDBChatMessageHistory(
-    session_id = "misterious_adventurer",
-    api_endpoint=ASTRA_ENDPOINT,
-    token=ASTRA_TOKEN,
+    session_id = "misterious_adventurer",  # Unique identifier for the session
+    api_endpoint=ASTRA_ENDPOINT,  # API endpoint for the AstraDB instance
+    token=ASTRA_TOKEN,  # Authentication token for accessing AstraDB
 )
 
+# Clear the message history prior to starting a new bot
 message_history.clear()
 
+# Create a ConversationBufferMemory instance to store the conversation history
 buffer_memory = ConversationBufferMemory(
     memory_key = "chat_history",
     chat_memory=message_history
 )
 
-
+# Create the prompt template for the conversation chain with Anthropic's Claude
 claude_template = """
 You are now the AI copilot of an exploration mission being carried on by a space traveller
 and will help the user (hence called traveller) explore a new solar system and discover misteries and artifacts,
@@ -67,7 +71,7 @@ This is the previous chat history to be used in the construction of the next eve
 ---
 This is the last user response from which to generate the sequence of the story: {user_input}"""
 
-
+# Create the prompt template for the conversation chain with Mistral's model
 bedrock_template = """
 <s>[INST] <<SYS>> You are now the AI copilot of an exploration mission being carried on by a space traveller
 and will help the user (hence called traveller) explore a new solar system and discover misteries and artifacts,
@@ -94,9 +98,13 @@ User input: {user_input}[/INST]
 AI:"""
 
 
+# Loop to force configuration of the model to be used on the game session
 while True:
+
+    # Ask the user for the model to use on the game session
     model_choice = input("Would you like to use Bedrock Anthropic Haiku(1) or the Bedrock Mistral model?(2): ")
 
+    # Check if the user entered a valid choice and prepare the model
     if model_choice == "1":                               # Anthropic Claude 3 Haiku
         prompt = PromptTemplate(
             input_variables=["chat_history", "user_input"],
@@ -120,6 +128,7 @@ while True:
 
         break
 
+    # Check if the user entered a valid choice and prepare the model
     elif model_choice == "2":                             # Bedrock Mistral 8x7B
         prompt = PromptTemplate(
             input_variables=["chat_history", "user_input"],
@@ -146,13 +155,10 @@ while True:
 
 
 
-
-#
-
-
 # Prepares to start the conversation
 choice = "start"
 
+# Loop to keep the conversation going until the story contains: "The End"
 while True:
 
     response = llm_chain.predict(user_input=choice)
